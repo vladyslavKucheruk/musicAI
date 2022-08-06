@@ -7,6 +7,7 @@ import { Roles } from 'src/roles/decorators/roles.decorator';
 import { AssignRoleDto } from 'src/roles/dto/assignRoleDto';
 import { Role } from 'src/roles/role';
 import { CreateUserDto } from './dto/createUserDro';
+import { DeactivateUserDto } from './dto/deactivateUserDto';
 import { UpdateUserDto } from './dto/updateUserDto';
 import { User } from './models/user.model';
 import { UsersService } from './users.service';
@@ -39,7 +40,7 @@ export class UsersController {
   @Put(':id')
   @ApiResponse({ status: HttpStatus.ACCEPTED, type: User })
   @ApiOperation({ summary: 'update user' })
-  updateUserActivation(@Param('id') id: number, @Body() dto: UpdateUserDto) {
+  updateUser(@Param('id') id: number, @Body() dto: UpdateUserDto) {
     return this.usersService.update(id, dto);
   }
 
@@ -67,5 +68,12 @@ export class UsersController {
   @ApiOperation({ summary: 'Assign role to user with admin roots' })
   assignRole(@Body() dto: AssignRoleDto) {
     return this.usersService.assignRole(dto);
+  }
+
+  @Roles(Role.ADMIN)
+  @UseGuards(RolesAuthGuard)
+  @Post('/deactivate-user')
+  deactivate(@Body() dto: DeactivateUserDto) {
+    return this.usersService.deactivate(dto);
   }
 }

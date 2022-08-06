@@ -16,7 +16,7 @@ export class AuthService {
   }
 
   async signUp(dto: CreateUserDto) {
-    const candidate = await this.userService.findOne(dto.email);
+    const candidate = await this.userService.findOneByEmail(dto.email);
 
     if (candidate) {
       throw new HttpException('This user is already in the system', HttpStatus.BAD_REQUEST);
@@ -29,7 +29,7 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.userService.findOne(email);
+    const user = await this.userService.findOneByEmail(email);
     const isPasswordsEqual = await bcrypt.compare(password, user.password);
 
     if (user && isPasswordsEqual) {

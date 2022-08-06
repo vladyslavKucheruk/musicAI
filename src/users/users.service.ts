@@ -7,6 +7,7 @@ import { UpdateUserDto } from './dto/updateUserDto';
 import { RolesService } from 'src/roles/roles.service';
 import { AssignRoleDto } from 'src/roles/dto/assignRoleDto';
 import { Role } from 'src/roles/role';
+import { DeactivateUserDto } from './dto/deactivateUserDto';
 
 @Injectable()
 export class UsersService {
@@ -48,8 +49,20 @@ export class UsersService {
     return users;
   }
 
-  async findOne(email: string): Promise<User> {
+  async findOneByEmail(email: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { email }, include: { all: true } });
     return user;
+  }
+
+  async deactivate(dto: DeactivateUserDto): Promise<User> {
+    const user = await this.userRepository.findByPk(dto.userId);
+
+    if (user) {
+      user.isActivate = false;
+      await user.save();
+      return user;
+    }
+
+    throw new HttpException('User not found', HttpStatus.NOT_FOUND);
   }
 }
