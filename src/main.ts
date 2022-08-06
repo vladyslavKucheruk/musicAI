@@ -7,12 +7,7 @@ const start = async () => {
   const PORT = process.env.PORT || 4000;
   const app = await NestFactory.create(App);
 
-  const config = new DocumentBuilder()
-    .setTitle('Advanced BE API')
-    .setDescription('API documentation for advanced BE app')
-    .setVersion('0.1')
-    .addTag('Docs')
-    .build();
+  const config = new DocumentBuilder().setTitle('Advanced BE API').setDescription('API documentation for advanced BE app').setVersion('0.1').build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 

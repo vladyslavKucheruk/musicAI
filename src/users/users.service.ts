@@ -1,17 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 
 import { User } from './models/user.model';
 import { CreateUserDto } from './dto/createUserDro';
 import { UpdateUserDto } from './dto/updateUserDto';
+import { RolesService } from 'src/roles/roles.service';
+import { AssignRoleDto } from 'src/roles/dto/assignRoleDto';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User) private userRepository: typeof User) {}
+  constructor(@InjectModel(User) private userRepository: typeof User, private roleService: RolesService) {}
 
   async create(dto: CreateUserDto): Promise<User> {
     const user = await this.userRepository.create(dto);
+    const role = await this.roleService.getByValue('USER');
+    await user.$set('roles', [role.id]);
+    user.roles = [role];
     return user;
+  }
+
+  async assignRole(dto: AssignRoleDto): Promise<User> {
+    const user = await this.userRepository.findByPk(dto.userId);
+    const role = await this.roleService.getByValue(dto.value);
+
+    if (user && role) {
+      await user.$add('role', role.id);
+      return user;
+    }
+
+    throw new HttpException('Role or user not found', HttpStatus.NOT_FOUND);
   }
 
   async update(id: number, dto: UpdateUserDto): Promise<User> {
@@ -26,7 +43,12 @@ export class UsersService {
   }
 
   async findAll(): Promise<Array<User>> {
-    const users = await this.userRepository.findAll();
+    const users = await this.userRepository.findAll({ include: { all: true } });
     return users;
+  }
+
+  async findOne(email: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { email }, include: { all: true } });
+    return user;
   }
 }

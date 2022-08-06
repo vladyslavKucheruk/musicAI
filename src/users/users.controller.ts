@@ -1,7 +1,10 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-custom.guard';
 
+import { RolesAuthGuard } from 'src/auth/guards/roles-auth.guard';
+import { Roles } from 'src/roles/decorators/roles.decorator';
+import { AssignRoleDto } from 'src/roles/dto/assignRoleDto';
 import { CreateUserDto } from './dto/createUserDro';
 import { UpdateUserDto } from './dto/updateUserDto';
 import { User } from './models/user.model';
@@ -13,12 +16,16 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get()
+  @Roles('ADMIN')
+  @UseGuards(RolesAuthGuard)
   @ApiResponse({ status: HttpStatus.OK, type: [User] })
   @ApiOperation({ summary: 'get all users' })
   getAllUsers() {
     return this.usersService.findAll();
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesAuthGuard)
   @Post()
   @ApiResponse({ status: HttpStatus.CREATED, type: User })
   @ApiOperation({ summary: 'create user' })
@@ -26,6 +33,8 @@ export class UsersController {
     return this.usersService.create(userDto);
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesAuthGuard)
   @Put(':id')
   @ApiResponse({ status: HttpStatus.ACCEPTED, type: User })
   @ApiOperation({ summary: 'update user' })
@@ -33,6 +42,7 @@ export class UsersController {
     return this.usersService.update(id, dto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put(':id/reset-password')
   @ApiResponse({ status: HttpStatus.ACCEPTED, type: User })
   @ApiOperation({ summary: 'update user' })
@@ -40,10 +50,21 @@ export class UsersController {
     return this.usersService.update(id, dto);
   }
 
+  @Roles('ADMIN')
+  @UseGuards(RolesAuthGuard)
   @Delete(':id')
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   @ApiOperation({ summary: 'delete user' })
   deleteUser(@Param('id') id: number) {
     return this.usersService.delete(id);
+  }
+
+  // @Roles('ADMIN')
+  // @UseGuards(RolesAuthGuard)
+  @Post('/assign-role')
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiOperation({ summary: 'Assign role to user with admin roots' })
+  assignRole(@Body() dto: AssignRoleDto) {
+    return this.usersService.assignRole(dto);
   }
 }
