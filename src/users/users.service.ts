@@ -6,6 +6,7 @@ import { CreateUserDto } from './dto/createUserDro';
 import { UpdateUserDto } from './dto/updateUserDto';
 import { RolesService } from 'src/roles/roles.service';
 import { AssignRoleDto } from 'src/roles/dto/assignRoleDto';
+import { Role } from 'src/roles/role';
 
 @Injectable()
 export class UsersService {
@@ -13,7 +14,7 @@ export class UsersService {
 
   async create(dto: CreateUserDto): Promise<User> {
     const user = await this.userRepository.create(dto);
-    const role = await this.roleService.getByValue('USER');
+    const role = await this.roleService.getByValue(Role.USER);
     await user.$set('roles', [role.id]);
     user.roles = [role];
     return user;
@@ -24,7 +25,7 @@ export class UsersService {
     const role = await this.roleService.getByValue(dto.value);
 
     if (user && role) {
-      await user.$add('role', role.id);
+      await user.$add('roles', role.id);
       return user;
     }
 

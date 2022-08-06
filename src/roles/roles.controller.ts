@@ -1,12 +1,12 @@
 import { Body, Controller, Get, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-custom.guard';
 import { RolesAuthGuard } from 'src/auth/guards/roles-auth.guard';
 import { Roles } from './decorators/roles.decorator';
-import { AssignRoleDto } from './dto/assignRoleDto';
 import { CreateRoleDto } from './dto/createRoleDto';
-import { Role } from './models/role.model';
+import { Role as RoleModel } from './models/role.model';
+import { Role } from './role';
 import { RolesService } from './roles.service';
 
 @ApiTags('Roles')
@@ -17,13 +17,16 @@ export class RolesController {
   @UseGuards(JwtAuthGuard)
   @Get(':value')
   @ApiResponse({ status: HttpStatus.OK })
+  @ApiOperation({ summary: 'Get role by value' })
   getByValue(@Param('value') value: string) {
     return this.roleService.getByValue(value);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Roles(Role.ADMIN)
+  @UseGuards(RolesAuthGuard)
   @Post()
-  @ApiResponse({ status: HttpStatus.CREATED, type: Role })
+  @ApiResponse({ status: HttpStatus.CREATED, type: RoleModel })
+  @ApiOperation({ summary: 'Create new role for users' })
   createRole(@Body() dto: CreateRoleDto) {
     return this.roleService.create(dto);
   }

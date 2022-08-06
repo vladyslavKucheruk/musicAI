@@ -1,10 +1,11 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-custom.guard';
 
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-custom.guard';
 import { RolesAuthGuard } from 'src/auth/guards/roles-auth.guard';
 import { Roles } from 'src/roles/decorators/roles.decorator';
 import { AssignRoleDto } from 'src/roles/dto/assignRoleDto';
+import { Role } from 'src/roles/role';
 import { CreateUserDto } from './dto/createUserDro';
 import { UpdateUserDto } from './dto/updateUserDto';
 import { User } from './models/user.model';
@@ -16,7 +17,7 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get()
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   @UseGuards(RolesAuthGuard)
   @ApiResponse({ status: HttpStatus.OK, type: [User] })
   @ApiOperation({ summary: 'get all users' })
@@ -24,7 +25,7 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   @UseGuards(RolesAuthGuard)
   @Post()
   @ApiResponse({ status: HttpStatus.CREATED, type: User })
@@ -33,7 +34,7 @@ export class UsersController {
     return this.usersService.create(userDto);
   }
 
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   @UseGuards(RolesAuthGuard)
   @Put(':id')
   @ApiResponse({ status: HttpStatus.ACCEPTED, type: User })
@@ -50,7 +51,7 @@ export class UsersController {
     return this.usersService.update(id, dto);
   }
 
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   @UseGuards(RolesAuthGuard)
   @Delete(':id')
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
@@ -59,8 +60,8 @@ export class UsersController {
     return this.usersService.delete(id);
   }
 
-  // @Roles('ADMIN')
-  // @UseGuards(RolesAuthGuard)
+  @Roles(Role.ADMIN)
+  @UseGuards(RolesAuthGuard)
   @Post('/assign-role')
   @ApiResponse({ status: HttpStatus.OK })
   @ApiOperation({ summary: 'Assign role to user with admin roots' })

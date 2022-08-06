@@ -12,7 +12,6 @@ export class AuthService {
 
   async signIn(dto: CreateUserDto) {
     const user = await this.validateUser(dto.email, dto.password);
-    console.log(user);
     return this.generateToken(user);
   }
 
@@ -31,7 +30,6 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userService.findOne(email);
-    console.log(user);
     const isPasswordsEqual = await bcrypt.compare(password, user.password);
 
     if (user && isPasswordsEqual) {
