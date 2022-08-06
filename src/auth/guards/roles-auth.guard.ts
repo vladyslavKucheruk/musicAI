@@ -21,7 +21,7 @@ export class RolesAuthGuard implements CanActivate {
 
       if (tokenType !== 'Bearer' || !token) throw new UnauthorizedException();
 
-      const user: User = this.jwtService.verify(token);
+      const user: User = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
       req.user = user;
 
       return user.roles.some((role) => roles.includes(role.value));

@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean } from 'class-validator';
 
 export class UpdateUserDto {
-  @ApiProperty({ example: '123456' })
-  readonly password?: string;
-
   @ApiProperty({ example: false })
+  @IsBoolean({ message: 'Should be a boolean value' })
   readonly isActivate?: boolean;
 }
