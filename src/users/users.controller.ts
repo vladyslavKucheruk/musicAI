@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-custom.guard';
 import { RolesAuthGuard } from 'src/auth/guards/roles-auth.guard';
 import { Roles } from 'src/roles/decorators/roles.decorator';
 import { AssignRoleDto } from 'src/roles/dto/assignRoleDto';
@@ -44,19 +43,11 @@ export class UsersController {
     return this.usersService.update(id, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Put(':id/reset-password')
-  @ApiResponse({ status: HttpStatus.ACCEPTED, type: User })
-  @ApiOperation({ summary: 'update user' })
-  updateUserPassword(@Param('id') id: number, @Body() dto: UpdateUserDto) {
-    return this.usersService.update(id, dto);
-  }
-
   @Roles(Role.ADMIN)
   @UseGuards(RolesAuthGuard)
   @Delete(':id')
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
-  @ApiOperation({ summary: 'delete user' })
+  @ApiOperation({ summary: 'Delete user' })
   deleteUser(@Param('id') id: number) {
     return this.usersService.delete(id);
   }
@@ -73,6 +64,8 @@ export class UsersController {
   @Roles(Role.ADMIN)
   @UseGuards(RolesAuthGuard)
   @Post('/deactivate-user')
+  @ApiResponse({ status: HttpStatus.OK })
+  @ApiOperation({ summary: 'Deactivate user' })
   deactivate(@Body() dto: DeactivateUserDto) {
     return this.usersService.deactivate(dto);
   }
