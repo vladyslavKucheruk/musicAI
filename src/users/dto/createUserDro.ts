@@ -9,6 +9,6 @@ export class CreateUserDto {
 
   @ApiProperty({ example: '123456' })
   @IsString({ message: 'Should be a string' })
-  @MinLength(6, { message: 'Should contain at least 6 symbols ' })
+  @MinLength(6, { message: 'Should contain at least 6 symbols' })
   readonly password: string;
 }
