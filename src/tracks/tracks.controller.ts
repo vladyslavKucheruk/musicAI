@@ -1,7 +1,11 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Query, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-custom.guard';
+import { RolesAuthGuard } from 'src/auth/guards/roles-auth.guard';
+import { Roles } from 'src/roles/decorators/roles.decorator';
+import { Role } from 'src/roles/role';
 import { AddCommentDto } from './dto/addCommentDto';
 import { CreateTrackDto } from './dto/createTrackDto';
 import { TracksService } from './tracks.service';
@@ -12,6 +16,7 @@ export class TracksController {
   constructor(private trackService: TracksService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: HttpStatus.OK })
   @ApiOperation({ summary: 'Get all available tracks' })
   allTracks() {
@@ -19,25 +24,30 @@ export class TracksController {
   }
 
   @Get('popular')
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: HttpStatus.OK })
   @ApiOperation({ summary: 'Get popular tracks' })
   popularTracks() {
-    this.trackService.findPopular();
+    return this.trackService.findPopular();
   }
 
   @Get('search')
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: HttpStatus.OK })
   @ApiOperation({ summary: 'Search tracks by title' })
-  search(@Query('title') title: string) {
-    return this.trackService.searchByTitle(title);
+  searchTracks(@Query() query: any) {
+    return this.trackService.searchByTitle(query.title);
   }
 
   @Get('recently-played/:userId')
+  @UseGuards(JwtAuthGuard)
   recentlyPlayed() {
     return 'Unavailable now';
   }
 
   @Post('upload')
+  @Roles(Role.ADMIN)
+  @UseGuards(RolesAuthGuard)
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'image', maxCount: 1 },
@@ -51,6 +61,7 @@ export class TracksController {
   }
 
   @Post('listen')
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: HttpStatus.OK })
   @ApiOperation({ summary: 'Add one listen to particular track' })
   listen(@Param('id') id: number) {
@@ -58,6 +69,7 @@ export class TracksController {
   }
 
   @Post('comment')
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: HttpStatus.OK })
   @ApiOperation({ summary: 'Comment track' })
   addComment(@Body() dto: AddCommentDto) {

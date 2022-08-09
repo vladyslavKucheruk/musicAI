@@ -11,6 +11,7 @@ interface TrackAttr {
   userId: number;
   image: string;
   audio: string;
+  plays: number;
 }
 
 @Table({ tableName: 'tracks' })

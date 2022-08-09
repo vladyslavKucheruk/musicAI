@@ -7,6 +7,7 @@ import { CreateTrackDto } from './dto/createTrackDto';
 import { Comment } from './models/comment.model';
 import { Track } from './models/track.model';
 import { File } from 'src/files/file.types';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class TracksService {
@@ -19,7 +20,7 @@ export class TracksService {
   async create(dto: CreateTrackDto, image: Express.Multer.File, audio: Express.Multer.File): Promise<any> {
     const imageName = this.filesService.uploadFile(image[0], File.IMAGE);
     const audioName = this.filesService.uploadFile(audio[0], File.AUDIO);
-    const track = await this.trackRepository.create({ ...dto, image: imageName, audio: audioName });
+    const track = await this.trackRepository.create({ ...dto, plays: 0, image: imageName, audio: audioName });
     return track;
   }
 
@@ -29,12 +30,12 @@ export class TracksService {
   }
 
   async findPopular(): Promise<Array<Track>> {
-    const tracks = await this.trackRepository.findAll({ order: ['listen', 'ASC'] });
+    const tracks = await this.trackRepository.findAll({ order: [['plays', 'DESC']] });
     return tracks;
   }
 
   async searchByTitle(title: string): Promise<Array<Track>> {
-    const tracks = await this.trackRepository.findAll({ where: { title } });
+    const tracks = await this.trackRepository.findAll({ where: { title: { [Op.substring]: title } } });
     return tracks;
   }
 

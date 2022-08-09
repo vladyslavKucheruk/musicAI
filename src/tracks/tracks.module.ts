@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { JwtModule } from '@nestjs/jwt';
 
 import { TracksService } from './tracks.service';
 import { TracksController } from './tracks.controller';
@@ -11,6 +12,6 @@ import { FilesModule } from 'src/files/files.module';
 @Module({
   providers: [TracksService],
   controllers: [TracksController],
-  imports: [SequelizeModule.forFeature([User, Track, Comment]), FilesModule],
+  imports: [SequelizeModule.forFeature([User, Track, Comment]), FilesModule, JwtModule],
 })
 export class TracksModule {}
