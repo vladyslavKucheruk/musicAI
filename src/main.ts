@@ -8,7 +8,23 @@ const start = async () => {
   const PORT = process.env.PORT || 5000;
   const app = await NestFactory.create(App, { cors: true });
 
-  const config = new DocumentBuilder().setTitle('MusicAI API').setDescription('API documentation for music app').setVersion('0.2').build();
+  const config = new DocumentBuilder()
+    .setTitle('MusicAI API')
+    .setDescription('API documentation for music app')
+    .setVersion('0.3')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .build();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 

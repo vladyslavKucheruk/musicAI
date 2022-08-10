@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-custom.guard';
 import { RolesAuthGuard } from 'src/auth/guards/roles-auth.guard';
@@ -14,17 +14,19 @@ import { RolesService } from './roles.service';
 export class RolesController {
   constructor(private roleService: RolesService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Get(':value')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiResponse({ status: HttpStatus.OK })
   @ApiOperation({ summary: 'Get role by value' })
   getByValue(@Param('value') value: string) {
     return this.roleService.getByValue(value);
   }
 
+  @Post()
   @Roles(Role.ADMIN)
   @UseGuards(RolesAuthGuard)
-  @Post()
+  @ApiBearerAuth('JWT-auth')
   @ApiResponse({ status: HttpStatus.CREATED, type: RoleModel })
   @ApiOperation({ summary: 'Create new role for users' })
   createRole(@Body() dto: CreateRoleDto) {

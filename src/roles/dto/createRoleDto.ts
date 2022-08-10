@@ -3,7 +3,7 @@ import { IsString } from 'class-validator';
 import { Role } from '../role';
 
 export class CreateRoleDto {
-  @ApiProperty({ example: Role.ADMIN })
+  @ApiProperty({ example: Role.ADMIN, enum: ['ADMIN', 'USER'] })
   @IsString({ message: 'Should be a string' })
   readonly value: string;
 

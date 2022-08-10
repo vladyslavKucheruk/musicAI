@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
 
 import { FilesService } from 'src/files/files.service';
 import { AddCommentDto } from './dto/addCommentDto';
@@ -7,7 +8,6 @@ import { CreateTrackDto } from './dto/createTrackDto';
 import { Comment } from './models/comment.model';
 import { Track } from './models/track.model';
 import { File } from 'src/files/file.types';
-import { Op } from 'sequelize';
 
 @Injectable()
 export class TracksService {
@@ -24,18 +24,23 @@ export class TracksService {
     return track;
   }
 
-  async findAll(): Promise<Array<Track>> {
-    const tracks = await this.trackRepository.findAll();
+  async findAll(limit = 10, offset = 0): Promise<Array<Track>> {
+    const tracks = await this.trackRepository.findAll({ include: { all: true }, limit, offset });
     return tracks;
   }
 
-  async findPopular(): Promise<Array<Track>> {
-    const tracks = await this.trackRepository.findAll({ order: [['plays', 'DESC']] });
+  async findPopular(limit = 10, offset = 0): Promise<Array<Track>> {
+    const tracks = await this.trackRepository.findAll({ order: [['plays', 'DESC']], include: { all: true }, limit, offset });
     return tracks;
   }
 
-  async searchByTitle(title: string): Promise<Array<Track>> {
-    const tracks = await this.trackRepository.findAll({ where: { title: { [Op.substring]: title } } });
+  async searchByTitle(title: string, limit = 10, offset = 0): Promise<Array<Track>> {
+    const tracks = await this.trackRepository.findAll({
+      where: { title: { [Op.substring]: title } },
+      include: { all: true },
+      limit,
+      offset,
+    });
     return tracks;
   }
 
@@ -45,6 +50,7 @@ export class TracksService {
 
     if (track && comment) {
       await track.$add('comments', comment.id);
+      return;
     }
 
     throw new HttpException('Error with track or comment', HttpStatus.INTERNAL_SERVER_ERROR);
@@ -52,9 +58,10 @@ export class TracksService {
 
   async listen(id: number) {
     const track = await this.trackRepository.findByPk(id);
+
     if (track) {
       track.plays += 1;
-      track.save();
+      return await track.save();
     }
 
     throw new HttpException('Track not found', HttpStatus.NOT_FOUND);
